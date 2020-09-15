@@ -145,6 +145,7 @@ public class RebalancePushImpl extends RebalanceImpl {
             case CONSUME_FROM_LAST_OFFSET: {
                 long lastOffset = offsetStore.readOffset(mq, ReadOffsetType.READ_FROM_STORE);
                 if (lastOffset >= 0) {
+                    //如果当前group消费过该队列，则接着消费
                     result = lastOffset;
                 }
                 // First start,no offset
@@ -153,6 +154,7 @@ public class RebalancePushImpl extends RebalanceImpl {
                         result = 0L;
                     } else {
                         try {
+                            //如果没消费过，从maxOffset接着消费
                             result = this.mQClientFactory.getMQAdminImpl().maxOffset(mq);
                         } catch (MQClientException e) {
                             result = -1;
@@ -166,8 +168,10 @@ public class RebalancePushImpl extends RebalanceImpl {
             case CONSUME_FROM_FIRST_OFFSET: {
                 long lastOffset = offsetStore.readOffset(mq, ReadOffsetType.READ_FROM_STORE);
                 if (lastOffset >= 0) {
+                    //如果消费过，则接着消费
                     result = lastOffset;
                 } else if (-1 == lastOffset) {
+                    //如果当前group没消费过该队列，则从头消费
                     result = 0L;
                 } else {
                     result = -1;
