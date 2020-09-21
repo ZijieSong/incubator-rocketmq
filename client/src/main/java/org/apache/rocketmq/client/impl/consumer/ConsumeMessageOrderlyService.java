@@ -179,6 +179,12 @@ public class ConsumeMessageOrderlyService implements ConsumeMessageService {
     }
 
     @Override
+    //这里之所以不用传入的msg，是这么考虑的
+    //对于并发处理逻辑，比如先到了msg-d，交给了线程池去处理，紧接着发送下一次拉取请求
+    //下一次拉取请求拉取到了msg-e，然后交给了线程池去处理，没有问题
+    //但是对于顺序处理，由于两个消息是同一个queue，那么有可能处理msg-d的线程与处理msg-e的线程都同时到达获取本地msgqueue锁的位置
+    //有可能msg-e对应的线程先获取到锁，如果处理的是msg-e就不是顺序消费了
+    //因此这里做法是不用传入的msg，而是用processqueue的本地msg缓存，取前N个消息进行消费、
     public void submitConsumeRequest(//
         final List<MessageExt> msgs, //
         final ProcessQueue processQueue, //
@@ -512,7 +518,7 @@ public class ConsumeMessageOrderlyService implements ConsumeMessageService {
                             ConsumeReturnType returnType = ConsumeReturnType.SUCCESS;
                             boolean hasException = false;
                             try {
-                                this.processQueue.getLockConsume().lock(); // 锁定队列消费锁
+                                this.processQueue.getLockConsume().lock(); // 锁定队列消费锁，防止在消费过程中consumequeue被移除
 
                                 if (this.processQueue.isDropped()) {
                                     log.warn("consumeMessage, the message queue not be able to consume, because it's dropped. {}",

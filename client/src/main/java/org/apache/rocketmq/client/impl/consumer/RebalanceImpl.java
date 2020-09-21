@@ -418,6 +418,11 @@ public abstract class RebalanceImpl {
         List<PullRequest> pullRequestList = new ArrayList<>(); // 拉消息请求数组
         for (MessageQueue mq : mqSet) {
             if (!this.processQueueTable.containsKey(mq)) {
+                //这里分布式锁的意义在于，考虑这么一种情况
+                //a,b,c三个队列，1，2两个消费者，a由1消费，b，c由2消费
+                //一个订单的新增和删除发到c队列中，2先拿到新增的消息进行处理，假设处理很久，卡在这里了
+                //这时新上线3号消费者，rebalance，欲将c分配给3号
+                //假如没有全局锁，那么直接分配成功，那么
                 if (isOrder && !this.lock(mq)) { // 顺序消息锁定消息队列
                     log.warn("doRebalance, {}, add a new mq failed, {}, because lock failed", consumerGroup, mq);
                     continue;

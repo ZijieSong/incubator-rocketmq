@@ -59,7 +59,7 @@ public class Producer {
             body += "" + i;
         }
 
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+        for (int i = 0; i < 5; i++) {
             try {
 
                 /*
