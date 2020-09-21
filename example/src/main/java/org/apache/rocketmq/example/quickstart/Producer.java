@@ -31,9 +31,9 @@ public class Producer {
         /*
          * Instantiate with a producer group name.
          */
-        DefaultMQProducer producer = new DefaultMQProducer("please_rename_unique_group_name");
+        DefaultMQProducer producer = new DefaultMQProducer("private_evn_test_group");
 
-        producer.setNamesrvAddr("127.0.0.1:9876"); // TODO add by yunai
+        producer.setNamesrvAddr("red-rocketmq-namesrv.sit.devops.xiaohongshu.com:9876"); // TODO add by yunai
 //        producer.setSendLatencyFaultEnable(true);
         /*
          * Specify name server addresses.
@@ -54,19 +54,16 @@ public class Producer {
 
 //        Thread.sleep(10000000L);
 
-        String body = "";
-        for (int i = 0; i < 10 * 1024; i++) {
-            body += "" + i;
-        }
+        String body = "test";
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             try {
 
                 /*
                  * Create a message instance, specifying topic, tag and message body.
                  */
 
-                Message msg = new Message("TopicTest_mis" /* Topic */,
+                Message msg = new Message("private_env_test" /* Topic */,
                     "TagA" /* Tag */,
                     (body).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */
                 );
@@ -80,7 +77,6 @@ public class Producer {
 
 
                 System.out.printf("%s%n", sendResult);
-                break;
 //                System.out.println(i);
 //                if (i % 10000 == 0) {
 //                    System.out.println("sendOneway：" + i);
